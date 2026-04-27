@@ -1,174 +1,631 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>CodeSentinel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background-color: #0f1117;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            background-color: #212121;
+            color: #ececec;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
 
-        h1 { color: #4fc3f7; }
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: #171717;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 12px;
+            flex-shrink: 0;
+        }
 
-        select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             border-radius: 6px;
-            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
         }
 
-        textarea {
-            background-color: #1e1e2e;
-            color: #ffffff;
-            height: 200px;
+        .logo-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
         }
 
-        button {
-            background-color: #4fc3f7;
-            color: #000000;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-
-        button:hover { background-color: #81d4fa; }
-
-        .vuln-card {
-            background-color: #1e1e2e;
+        .new-scan-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: transparent;
+            border: 1px solid #3a3a3a;
             border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
+            color: #ececec;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            transition: background 0.2s;
         }
 
-        .severity-Critical { color: #ff5555; }
-        .severity-High { color: #ffaa00; }
-        .severity-Medium { color: #4fc3f7; }
-        .severity-Low { color: #50fa7b; }
+        .new-scan-btn:hover { background: #2a2a2a; }
 
-        .tabs { display: flex; gap: 10px; margin-top: 20px; }
+        .sidebar-section-title {
+            font-size: 11px;
+            color: #8e8e8e;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0 10px;
+            margin-bottom: 8px;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 4px; }
+
+        .history-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .history-item:hover { background: #2a2a2a; }
+
+        .history-item-lang {
+            font-size: 13px;
+            color: #ececec;
+            font-weight: 500;
+            text-transform: capitalize;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-item-meta {
+            font-size: 11px;
+            color: #8e8e8e;
+            margin-top: 2px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .history-item-findings {
+            color: #f87171;
+            font-weight: 500;
+        }
+
+        .sidebar-bottom {
+            border-top: 1px solid #2a2a2a;
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+
+        .sidebar-bottom-text {
+            font-size: 12px;
+            color: #8e8e8e;
+            padding: 0 10px;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .topbar-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #ececec;
+        }
+
+        .tabs {
+            display: flex;
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
 
         .tab-btn {
-            width: auto;
-            padding: 8px 20px;
-            background-color: #1e1e2e;
-            color: #ffffff;
-            cursor: pointer;
+            padding: 6px 16px;
+            border: none;
+            background: transparent;
+            color: #8e8e8e;
+            font-size: 12px;
+            font-weight: 500;
             border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            width: auto;
+            margin: 0;
+            transition: all 0.15s;
         }
 
         .tab-btn.active {
-            background-color: #4fc3f7;
-            color: #000000;
+            background: #3a3a3a;
+            color: #fff;
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content::-webkit-scrollbar { width: 6px; }
+        .content::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 4px; }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            font-size: 14px;
+            color: #8e8e8e;
+        }
+
+        /* SCAN AREA */
+        .scan-area {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            color: #ececec;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            height: 240px;
+            padding: 16px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            color: #ececec;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            resize: vertical;
+            line-height: 1.7;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        /* FILE UPLOAD */
+        .file-upload {
+            border: 2px dashed #3a3a3a;
+            border-radius: 12px;
+            padding: 50px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-upload:hover {
+            border-color: #6366f1;
+            background: rgba(99,102,241,0.03);
+        }
+
+        .file-upload-icon { font-size: 36px; margin-bottom: 14px; }
+
+        .file-upload-text {
+            color: #8e8e8e;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .file-upload-text span { color: #818cf8; }
+        input[type="file"] { display: none; }
+
+        /* SCAN BUTTON */
+        .scan-btn {
+            width: 100%;
+            padding: 13px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .scan-btn:hover { background: #4f46e5; }
+        .scan-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .spinner {
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESULTS */
+        .results-area {
+            width: 100%;
+            max-width: 720px;
+            margin-top: 28px;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .results-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stats { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .stat-pill {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-weight: 500;
+        }
+
+        .stat-critical { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .stat-high { background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+        .stat-medium { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2); }
+        .stat-low { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+
+        /* VULN CARD */
+        .vuln-card {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .vuln-card:hover { border-color: #4a4a4a; }
+
+        .vuln-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .vuln-name { font-size: 14px; font-weight: 600; color: #fff; }
+
+        .sev-badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-weight: 600;
+        }
+
+        .sev-Critical { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .sev-High { background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+        .sev-Medium { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2); }
+        .sev-Low { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+
+        .vuln-meta { font-size: 12px; color: #8e8e8e; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+        .vuln-desc { font-size: 13px; color: #b0b0b0; line-height: 1.6; margin-bottom: 12px; }
+
+        .vuln-fix {
+            background: rgba(99,102,241,0.07);
+            border-left: 3px solid #6366f1;
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        .vuln-fix strong { color: #818cf8; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: #8e8e8e;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <h1>🛡️ CodeSentinel</h1>
-    <p>AI-Powered Vulnerability Scanner</p>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🛡️</div>
+            <span class="logo-text">CodeSentinel</span>
+        </div>
 
-    <div class="tabs">
-        <button id="historyBtn" style="margin-top:20px; background-color:#1e1e2e; color:#4fc3f7;">
-            📋 View Scan History
+        <button class="new-scan-btn" onclick="newScan()">
+            ＋ New Scan
         </button>
-        <button class="tab-btn active" onclick="switchTab('paste', event)">Paste Code</button>
-        <button class="tab-btn" onclick="switchTab('upload', event)">Upload File</button>
+
+        <div class="sidebar-section-title">Recent Scans</div>
+
+        <div class="history-list" id="historyList">
+            <div style="font-size:12px; color:#8e8e8e; padding: 0 10px;">No scans yet</div>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-bottom-text">Powered by Mistral Codestral</div>
+        </div>
     </div>
 
-    <div id="paste-tab">
-        <select id="language">
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
-            <option value="php">PHP</option>
-            <option value="java">Java</option>
-        </select>
-        <textarea id="code" placeholder="Paste your code here..."></textarea>
-        <button id="scanBtn">Scan Code</button>
-    </div>
+    <!-- MAIN -->
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-title">Vulnerability Scanner</div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('paste', event)"> Paste Code</button>
+                <button class="tab-btn" onclick="switchTab('upload', event)">📁 Upload File</button>
+            </div>
+        </div>
 
-    <div id="upload-tab" style="display:none;">
-        <input type="file" id="fileInput" accept=".py,.js,.php,.java,.ts,.cpp,.c,.rb">
-        <button id="scanFileBtn">Scan File</button>
-    </div>
+        <div class="content">
+            <div class="hero">
+                <h1>What do you want to scan?</h1>
+                <p>Paste your code or upload a file to detect security vulnerabilities instantly</p>
+            </div>
 
-    <div id="results"></div>
+            <div class="scan-area">
+
+                <!-- PASTE TAB -->
+                <div id="paste-tab">
+                    <select id="language">
+                        <option value="python"> Python</option>
+                        <option value="javascript"> JavaScript</option>
+                        <option value="php"> PHP</option>
+                        <option value="java"> Java</option>
+                        <option value="typescript"> TypeScript</option>
+                        <option value="cpp"> C++</option>
+                    </select>
+                    <textarea id="code" placeholder="Paste your code here..."></textarea>
+                    <button class="scan-btn" id="scanBtn" onclick="scanCode()">
+                        <div class="spinner" id="spinner1"></div>
+                        <span id="scanBtnText"> Scan for Vulnerabilities</span>
+                    </button>
+                </div>
+
+                <!-- UPLOAD TAB -->
+                <div id="upload-tab" style="display:none;">
+                    <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                        <div class="file-upload-icon">📂</div>
+                        <div class="file-upload-text">
+                            <span id="fileName">Click to upload a file</span><br>
+                            <small style="color:#5a5a5a">.py .js .php .java .ts .cpp .c .rb</small>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".py,.js,.php,.java,.ts,.cpp,.c,.rb" onchange="updateFileName()">
+                    <button class="scan-btn" id="scanFileBtn" onclick="scanFile()">
+                        <div class="spinner" id="spinner2"></div>
+                        <span id="scanFileBtnText"> Scan File</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- RESULTS -->
+            <div class="results-area" id="results"></div>
+        </div>
+    </div>
 
     <script>
+        // Load history on startup
+        window.onload = function() { loadHistory(); }
+
         function switchTab(tab, event) {
             document.getElementById("paste-tab").style.display = tab === "paste" ? "block" : "none";
             document.getElementById("upload-tab").style.display = tab === "upload" ? "block" : "none";
-            document.querySelectorAll(".tab-btn").forEach(function(btn) {
-                btn.classList.remove("active");
-            });
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
             event.target.classList.add("active");
         }
 
+        function updateFileName() {
+            var file = document.getElementById("fileInput").files[0];
+            if (file) document.getElementById("fileName").textContent = file.name;
+        }
+
+        function newScan() {
+            document.getElementById("results").innerHTML = "";
+            document.getElementById("code").value = "";
+        }
+
+        function setLoading(btnId, spinnerId, textId, loading, text) {
+            document.getElementById(btnId).disabled = loading;
+            document.getElementById(spinnerId).style.display = loading ? "block" : "none";
+            document.getElementById(textId).textContent = loading ? "Scanning..." : text;
+        }
+
         function showResults(data) {
-            var html = "";
-            data.vulnerabilities.forEach(function(v) {
+            var vulns = data.vulnerabilities;
+            var critical = vulns.filter(v => v.severity === "Critical").length;
+            var high = vulns.filter(v => v.severity === "High").length;
+            var medium = vulns.filter(v => v.severity === "Medium").length;
+            var low = vulns.filter(v => v.severity === "Low").length;
+
+            var html = "<div class='results-header'>";
+            html += "<div class='results-title'>Found " + vulns.length + " vulnerabilit" + (vulns.length === 1 ? "y" : "ies") + "</div>";
+            html += "<div class='stats'>";
+            if (critical) html += "<span class='stat-pill stat-critical'>" + critical + " Critical</span>";
+            if (high) html += "<span class='stat-pill stat-high'>" + high + " High</span>";
+            if (medium) html += "<span class='stat-pill stat-medium'>" + medium + " Medium</span>";
+            if (low) html += "<span class='stat-pill stat-low'>" + low + " Low</span>";
+            html += "</div></div>";
+
+            if (vulns.length === 0) {
+                html += "<div class='empty-state'> No vulnerabilities found! Your code looks clean.</div>";
+            }
+
+            vulns.forEach(function(v) {
                 html += "<div class='vuln-card'>";
-                html += "<h3 class='severity-" + v.severity + "'>" + v.severity + " — " + v.name + "</h3>";
-                html += "<p><strong>Line:</strong> " + v.line + "</p>";
-                html += "<p><strong>Description:</strong> " + v.description + "</p>";
-                html += "<p><strong>Fix:</strong> " + v.fix + "</p>";
+                html += "<div class='vuln-card-header'>";
+                html += "<div class='vuln-name'>" + v.name + "</div>";
+                html += "<span class='sev-badge sev-" + v.severity + "'>" + v.severity + "</span>";
+                html += "</div>";
+                html += "<div class='vuln-meta'>Line " + v.line + "</div>";
+                html += "<div class='vuln-desc'>" + v.description + "</div>";
+                html += "<div class='vuln-fix'><strong> Fix:</strong> " + v.fix + "</div>";
                 html += "</div>";
             });
+
             document.getElementById("results").innerHTML = html;
         }
 
-        document.getElementById("scanBtn").onclick = function() {
+        var scanHistory = [];
+
+        function loadHistory() {
+            fetch("http://127.0.0.1:8000/history")
+            .then(r => r.json())
+            .then(data => {
+                scanHistory = data;
+                var html = "";
+                if (data.length === 0) {
+                    html = "<div style='font-size:12px; color:#8e8e8e; padding: 0 10px;'>No scans yet</div>";
+                } else {
+                    data.forEach(function(scan, index) {
+                        var date = new Date(scan.created_at).toLocaleDateString();
+                        html += "<div class='history-item' onclick='openHistory(" + index + ")'>";
+                        html += "<div class='history-item-lang'>" + scan.language + "</div>";
+                        html += "<div class='history-item-meta'>";
+                        html += "<span>" + date + "</span>";
+                        html += "<span class='history-item-findings'>" + scan.total_findings + " findings</span>";
+                        html += "</div></div>";
+                    });
+                }
+                document.getElementById("historyList").innerHTML = html;
+            });
+        }
+
+        function openHistory(index) {
+            var scan = scanHistory[index];
+            showResults(scan.results);
+            document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+        }
+        function scanCode() {
             var code = document.getElementById("code").value;
             var language = document.getElementById("language").value;
-            document.getElementById("results").innerHTML = "Scanning...";
+            if (!code.trim()) { alert("Please paste some code first!"); return; }
+            setLoading("scanBtn", "spinner1", "scanBtnText", true);
+            document.getElementById("results").innerHTML = "<div class='loading-state'> Analyzing your code...</div>";
             fetch("http://127.0.0.1:8000/scan", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code: code, language: language })
             })
-            .then(function(response) { return response.json(); })
-            .then(function(data) { showResults(data); });
+            .then(r => r.json())
+            .then(data => {
+                showResults(data);
+                setLoading("scanBtn", "spinner1", "scanBtnText", false, " Scan for Vulnerabilities");
+                loadHistory();
+            });
         }
 
-        document.getElementById("scanFileBtn").onclick = function() {
+        function scanFile() {
             var file = document.getElementById("fileInput").files[0];
             if (!file) { alert("Please select a file first!"); return; }
-            document.getElementById("results").innerHTML = "Scanning file...";
+            setLoading("scanFileBtn", "spinner2", "scanFileBtnText", true);
+            document.getElementById("results").innerHTML = "<div class='loading-state'> Analyzing your file...</div>";
             var formData = new FormData();
             formData.append("file", file);
             fetch("http://127.0.0.1:8000/scan-file", {
                 method: "POST",
                 body: formData
             })
-            .then(function(response) { return response.json(); })
-            .then(function(data) { showResults(data); });
-            
-            document.getElementById("historyBtn").onclick = function() {
-                fetch("http://127.0.0.1:8000/history")
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    var html = "<h2 style='color:#4fc3f7'>Scan History</h2>";
-                    
-                    if (data.length === 0) {
-                        html += "<p>No scans yet.</p>";
-                    }
-
-                    data.forEach(function(scan) {
-                        html += "<div class='vuln-card'>";
-                        html += "<p><strong>Language:</strong> " + scan.language + "</p>";
-                        html += "<p><strong>Findings:</strong> " + scan.total_findings + "</p>";
-                        html += "<p><strong>Date:</strong> " + scan.created_at + "</p>";
-                        html += "</div>";
-                    });
-
-                    document.getElementById("results").innerHTML = html;
-                });
-            }
+            .then(r => r.json())
+            .then(data => {
+                showResults(data);
+                setLoading("scanFileBtn", "spinner2", "scanFileBtnText", false, " Scan File");
+                loadHistory();
+            });
         }
     </script>
 

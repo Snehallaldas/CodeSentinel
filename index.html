@@ -563,7 +563,7 @@
         var scanHistory = [];
 
         function loadHistory() {
-            fetch("http://127.0.0.1:8000/history")
+            fetch("https://codesentinel-qcq1.onrender.com/history")
             .then(r => r.json())
             .then(data => {
                 scanHistory = data;
@@ -596,7 +596,7 @@
             if (!code.trim()) { alert("Please paste some code first!"); return; }
             setLoading("scanBtn", "spinner1", "scanBtnText", true);
             document.getElementById("results").innerHTML = "<div class='loading-state'> Analyzing your code...</div>";
-            fetch("http://127.0.0.1:8000/scan", {
+            fetch("https://codesentinel-qcq1.onrender.com/scan", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code: code, language: language })
@@ -616,7 +616,7 @@
             document.getElementById("results").innerHTML = "<div class='loading-state'> Analyzing your file...</div>";
             var formData = new FormData();
             formData.append("file", file);
-            fetch("http://127.0.0.1:8000/scan-file", {
+            fetch("https://codesentinel-qcq1.onrender.com/scan-file", {
                 method: "POST",
                 body: formData
             })

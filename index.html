@@ -440,6 +440,49 @@
 </head>
 <body>
 
+    <!-- AUTH PAGE -->
+    <div id="auth-page" style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #212121;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+    ">
+        <div style="width: 380px; background: #171717; border: 1px solid #2a2a2a; border-radius: 16px; padding: 32px;">
+            
+            <div style="text-align:center; margin-bottom: 28px;">
+                <div style="width:40px; height:40px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:12px;">🛡️</div>
+                <h2 style="color:#fff; font-size:20px; font-weight:700;">CodeSentinel</h2>
+                <p style="color:#8e8e8e; font-size:13px; margin-top:4px;">Sign in to your account</p>
+            </div>
+
+            <!-- TABS -->
+            <div style="display:flex; background:#212121; border-radius:8px; padding:3px; margin-bottom:24px;">
+                <button id="loginTabBtn" onclick="switchAuthTab('login')" style="flex:1; padding:7px; border:none; background:#2a2a2a; color:#fff; border-radius:6px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500;">Login</button>
+                <button id="signupTabBtn" onclick="switchAuthTab('signup')" style="flex:1; padding:7px; border:none; background:transparent; color:#8e8e8e; border-radius:6px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px;">Sign Up</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="login-form">
+                <input id="loginEmail" type="email" placeholder="Email" style="width:100%; padding:10px 14px; background:#212121; border:1px solid #3a3a3a; border-radius:8px; color:#fff; font-size:13px; font-family:'Inter',sans-serif; margin-bottom:10px;">
+                <input id="loginPassword" type="password" placeholder="Password" style="width:100%; padding:10px 14px; background:#212121; border:1px solid #3a3a3a; border-radius:8px; color:#fff; font-size:13px; font-family:'Inter',sans-serif; margin-bottom:16px;">
+                <button onclick="login()" style="width:100%; padding:11px; background:#6366f1; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer;">Login</button>
+            </div>
+
+            <!-- SIGNUP FORM -->
+            <div id="signup-form" style="display:none;">
+                <input id="signupUsername" type="text" placeholder="Username" style="width:100%; padding:10px 14px; background:#212121; border:1px solid #3a3a3a; border-radius:8px; color:#fff; font-size:13px; font-family:'Inter',sans-serif; margin-bottom:10px;">
+                <input id="signupEmail" type="email" placeholder="Email" style="width:100%; padding:10px 14px; background:#212121; border:1px solid #3a3a3a; border-radius:8px; color:#fff; font-size:13px; font-family:'Inter',sans-serif; margin-bottom:10px;">
+                <input id="signupPassword" type="password" placeholder="Password" style="width:100%; padding:10px 14px; background:#212121; border:1px solid #3a3a3a; border-radius:8px; color:#fff; font-size:13px; font-family:'Inter',sans-serif; margin-bottom:16px;">
+                <button onclick="signup()" style="width:100%; padding:11px; background:#6366f1; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer;">Create Account</button>
+            </div>
+
+            <div id="auth-error" style="color:#f87171; font-size:13px; margin-top:12px; text-align:center;"></div>
+        </div>
+    </div>
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="logo">
@@ -458,7 +501,8 @@
         </div>
 
         <div class="sidebar-bottom">
-            <div class="sidebar-bottom-text">Powered by Mistral Codestral</div>
+            <div class="sidebar-bottom-text" id="userInfo">Powered by Mistral Codestral</div>
+            <button onclick="logout()" style="width:100%; margin-top:8px; padding:8px; background:transparent; border:1px solid #3a3a3a; border-radius:6px; color:#8e8e8e; font-size:12px; cursor:pointer; font-family:'Inter',sans-serif;">Logout</button>
         </div>
     </div>
 
@@ -522,8 +566,83 @@
     </div>
 
     <script>
-        // Load history on startup
-        window.onload = function() { loadHistory(); }
+        function switchAuthTab(tab) {
+            document.getElementById("login-form").style.display = tab === "login" ? "block" : "none";
+            document.getElementById("signup-form").style.display = tab === "signup" ? "block" : "none";
+            document.getElementById("loginTabBtn").style.background = tab === "login" ? "#2a2a2a" : "transparent";
+            document.getElementById("loginTabBtn").style.color = tab === "login" ? "#fff" : "#8e8e8e";
+            document.getElementById("signupTabBtn").style.background = tab === "signup" ? "#2a2a2a" : "transparent";
+            document.getElementById("signupTabBtn").style.color = tab === "signup" ? "#fff" : "#8e8e8e";
+        }
+
+        function login() {
+            var email = document.getElementById("loginEmail").value;
+            var password = document.getElementById("loginPassword").value;
+            if (!email || !password) { showAuthError("Please fill in all fields"); return; }
+
+            fetch("https://codesentinel-qcq1.onrender.com/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email, password: password })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("username", data.username);
+                    showApp();
+                } else {
+                    showAuthError(data.detail || "Login failed");
+                }
+            });
+        }
+
+        function signup() {
+            var username = document.getElementById("signupUsername").value;
+            var email = document.getElementById("signupEmail").value;
+            var password = document.getElementById("signupPassword").value;
+            if (!username || !email || !password) { showAuthError("Please fill in all fields"); return; }
+
+            fetch("https://codesentinel-qcq1.onrender.com/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: username, email: email, password: password })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.message) {
+                    showAuthError("Account created! Please login.");
+                    switchAuthTab("login");
+                } else {
+                    showAuthError(data.detail || "Signup failed");
+                }
+            });
+        }
+
+        function showAuthError(msg) {
+            document.getElementById("auth-error").textContent = msg;
+        }
+
+        function showApp() {
+            document.getElementById("auth-page").style.display = "none";
+            var username = localStorage.getItem("username");
+            document.querySelector(".sidebar-bottom-text").textContent = "Logged in as " + username;
+            loadHistory();
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("username");
+            location.reload();
+        }
+
+        // check if already logged in on page load
+        window.onload = function() {
+            var token = localStorage.getItem("token");
+            if (token) {
+                showApp();
+            }
+        }
 
         function switchTab(tab, event) {
             document.getElementById("paste-tab").style.display = tab === "paste" ? "block" : "none";

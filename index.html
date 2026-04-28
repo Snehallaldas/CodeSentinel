@@ -715,12 +715,15 @@
                 } else {
                     data.forEach(function(scan, index) {
                         var date = new Date(scan.created_at).toLocaleDateString();
-                        html += "<div class='history-item' onclick='openHistory(" + index + ")'>";
+                        html += "<div class='history-item' style='display:flex; justify-content:space-between; align-items:center;'>";
+                        html += "<div onclick='openHistory(" + index + ")' style='flex:1; cursor:pointer;'>";
                         html += "<div class='history-item-lang'>" + scan.language + "</div>";
                         html += "<div class='history-item-meta'>";
                         html += "<span>" + date + "</span>";
                         html += "<span class='history-item-findings'>" + scan.total_findings + " findings</span>";
                         html += "</div></div>";
+                        html += "<button onclick='deleteScan(" + scan.id + ")' style='background:transparent; border:none; color:#8e8e8e; cursor:pointer; padding:4px 8px; border-radius:4px; font-size:14px;' title='Delete'>✕</button>";
+                        html += "</div>";
                     });
                 }
                 document.getElementById("historyList").innerHTML = html;
@@ -772,6 +775,15 @@
         function toggleSidebar() {
             var sidebar = document.querySelector(".sidebar");
             sidebar.classList.toggle("collapsed");
+        }
+        function deleteScan(id) {
+            fetch("https://codesentinel-qcq1.onrender.com/history/" + id, {
+                method: "DELETE"
+            })
+            .then(r => r.json())
+            .then(() => {
+                loadHistory();
+            });
         }
     </script>
 

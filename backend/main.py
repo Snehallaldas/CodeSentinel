@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from scanner import scan_code, detect_language
-from database import save_scan, get_all_scans
+from database import save_scan, get_all_scans, Session, Scan
 from auth import hash_password, verify_password, create_token, decode_token
 from database import create_user, get_user_by_email
 import json
@@ -98,3 +98,14 @@ def login(request: LoginRequest):
     # create and return token
     token = create_token({"user_id": user.id, "username": user.username})
     return {"token": token, "username": user.username}
+
+@app.delete("/history/{scan_id}")
+def delete_scan(scan_id: int):
+    session = Session()
+    scan = session.query(Scan).filter(Scan.id == scan_id).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    session.delete(scan)
+    session.commit()
+    session.close()
+    return {"message": "Scan deleted"}

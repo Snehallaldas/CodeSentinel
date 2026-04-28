@@ -110,7 +110,10 @@ http://localhost:3000
 
 ## Screenshots
 
-> Add screenshots here after taking them
+<img width="952" height="411" alt="image" src="https://github.com/user-attachments/assets/66946e1b-e3bc-426b-bfbf-9db40220e2f2" />
+<img width="1900" height="821" alt="image" src="https://github.com/user-attachments/assets/5e5d9041-0e57-4433-9882-8be4257b2c17" />
+
+
 
 ---
 

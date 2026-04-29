@@ -38,7 +38,6 @@ async def scan_file(file: UploadFile = File(...)):
     language = detect_language(file.filename)
     result = scan_code(code, language)
     
-    # add these lines to save to database
     save_scan(
         language=language,
         total_findings=len(result["vulnerabilities"]),
@@ -73,12 +72,10 @@ def get_history():
 
 @app.post("/signup")
 def signup(request: SignupRequest):
-    # check if user already exists
     existing = get_user_by_email(request.email)
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
-    # hash password and save user
+
     hashed = hash_password(request.password)
     create_user(request.username, request.email, hashed)
     
@@ -86,16 +83,14 @@ def signup(request: SignupRequest):
 
 @app.post("/login")
 def login(request: LoginRequest):
-    # find user by email
+
     user = get_user_by_email(request.email)
     if not user:
         raise HTTPException(status_code=400, detail="Invalid email or password")
     
-    # verify password
     if not verify_password(request.password, user.password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
     
-    # create and return token
     token = create_token({"user_id": user.id, "username": user.username})
     return {"token": token, "username": user.username}
 
